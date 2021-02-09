@@ -6,6 +6,7 @@ try:
     from sqlalchemy.orm import Session
     from sqlalchemy import create_engine, func
     from flask import Flask, jsonify
+    import datetime as dt
 
 except Exception as e:
     print(f" a module(s) have not been imported {e}")
@@ -103,13 +104,16 @@ def tobs():
 #When given the start and the end date, calculate the TMIN, TAVG, and TMAX for dates between the start and end date inclusive.
 
 
-@app.route("/api/v1.0/start/<dt_start>")
+# Note this part of the code doesnt work well. need more time to get it to work propertly 
+@app.route("/api/v1.0/<dt_start>")
 def start(dt_start):
 
+    #start_dt = func.strftime(dt_start)
     session = Session(engine)
     sel = [Meas.date, Meas.tobs]
     
     qry = session.query(*sel).filter(func.strftime(Meas.date) >= dt_start ).order_by(Meas.date).all()
+    #qry = session.query(*sel).filter(Meas.date >= dt_start ).order_by(Meas.date).all()
     
     session.close()
     start_temps = []
@@ -133,8 +137,10 @@ def start(dt_start):
 
 
 #When given the start and the end date, calculate the TMIN, TAVG, and TMAX for dates between the start and end date inclusive.
+
+# Note this part of the code doesnt work well. need more time to get it to work propertly 
 @app.route("/api/v1.0/<dt_start>/<dt_end>")
-def startend(start_end):
+def startend(dt_start, dt_end):
     session = Session(engine)
     sel = [Meas.date, Meas.tobs]
     
@@ -158,7 +164,7 @@ def startend(start_end):
         
         return jsonify(startend_tobs)
 
-    return jsonify({"error": f"Dates between {start_end} not found."}), 404
+    return jsonify({"error": f"Dates between {dt_start, dt_end} not found."}), 404
 
 if __name__ == '__main__':
     app.run(debug=True)
